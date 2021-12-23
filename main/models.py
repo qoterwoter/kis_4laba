@@ -32,21 +32,7 @@ HOTEL_CHOICE = (
     ('5','5'),
     ('a','Апартаменты'),
 )
-class Staff(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField("Имя сотрудника",max_length=255)
-    full_name = models.CharField('ФИО',max_length=255)
-    sex = models.CharField('Пол',max_length=1,choices=SEX_CHOICE)
-    position = models.CharField('Должность',max_length=20,choices=POSITION_CHOICE)
-    photo = models.CharField('Фотография',max_length=255)
-    birthday = models.DateField(("Дата рождения"), auto_now=False, auto_now_add=False)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    class Meta:
-        verbose_name = ("Сотрудник")
-        verbose_name_plural = ("Сотрудники")
-    def __str__(self):
-        return(self.name)
-    
+
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
     country = models.CharField('Страна',max_length=255)
@@ -75,7 +61,22 @@ class Organisation(models.Model):
         verbose_name_plural = ('Организации')
     def __str__(self):
         return(self.name)   
-
+class Staff(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField("Имя сотрудника",max_length=255)
+    full_name = models.CharField('ФИО',max_length=255)
+    sex = models.CharField('Пол',max_length=1,choices=SEX_CHOICE)
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
+    position = models.CharField('Должность',max_length=20,choices=POSITION_CHOICE)
+    photo = models.CharField('Фотография',max_length=255)
+    birthday = models.DateField(("Дата рождения"), auto_now=False, auto_now_add=False)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = ("Сотрудник")
+        verbose_name_plural = ("Сотрудники")
+    def __str__(self):
+        return(self.name)
+    
 class Agents(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField('Имя',max_length=255)
@@ -89,6 +90,7 @@ class Agents(models.Model):
     
 class Contract(models.Model):
     id = models.AutoField(primary_key=True)
+    title = models.CharField('Название договора',max_length=255)
     participants = models.IntegerField('Участники поездки')
     date = models.DateField(("Дата"), auto_now=False, auto_now_add=False)
     total = models.FloatField('Сумма(в валюте)')
@@ -97,7 +99,7 @@ class Contract(models.Model):
         verbose_name = ('Договор')
         verbose_name_plural = ('Договоры')
     def __str__(self):
-        return(str(self.id))   
+        return(self.title)   
     
 class PaymentOfTheContract(models.Model):
     id = models.AutoField(primary_key=True)
@@ -116,6 +118,7 @@ class Report(models.Model):
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
     staff = models.ForeignKey(Staff,on_delete=models.CASCADE)
     date = models.DateField('Дата')
+    currency = models.CharField('Валюта',max_length=100)
     total_currency = models.FloatField('Сумма(в валюте)')
     total_rubles = models.FloatField('Сумма(в рублях)')
     class Meta:
@@ -177,7 +180,7 @@ class Route(models.Model):
         verbose_name = ('Маршрут поездки')
         verbose_name_plural = ('Маршруты поездок')
     def __str__(self):
-        return(str(self.id))
+        return(str(self.contract))
 
 class Voucher(models.Model):
     id = models.AutoField(primary_key=True)
@@ -186,7 +189,7 @@ class Voucher(models.Model):
         verbose_name = ('Ваучер')
         verbose_name_plural = ('Ваучеры')
     def __str__(self):
-        return(str(self.id))
+        return(self.transport)
 
 class Tour(models.Model):
     id = models.AutoField(primary_key=True)

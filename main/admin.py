@@ -6,7 +6,7 @@ from import_export.formats import base_formats
 
 @admin.register(Staff)
 class StaffAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-      list_display = ("id","name","full_name","sex",'position',"photo","birthday")
+      list_display = ("id","name","full_name","sex",'position',"birthday")
       search_fields = ['name','full_name']
       list_filter = ['sex','position']
       pass
