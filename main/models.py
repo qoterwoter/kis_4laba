@@ -1,158 +1,226 @@
 from django.db import models
 from django.contrib.auth.models import User
 STATUS_CHOICE = (
-    ('y','Учится'),
-    ('n',"Отчсилен"),
-    ('q','Зачислен'),
-    ('a','Решается')
+    ('Привелигированный','Привелигированный'),
+    ('Обычный','Обычный'),
+    ('VIP','VIP')
 )
-class News(models.Model):
+NUMBERS_CHOICE = (
+    ('Стандарт','Стандарт'),
+    ('Делюкс','Делюкс'),
+)
+EAT_CHOICE = (
+    ('RO','RO'),
+    ('EP','EP'),
+    ('BB','BB'),
+    ('H','H'),
+)
+SEX_CHOICE = (
+    ('м',"Мужской"),
+    ('ж',"Женский")
+)
+POSITION_CHOICE = (
+    ('Бухгалтер','Бухгалтер'),
+    ('Администратор','Администратор'),
+    ('Менеджер','Менеджер')
+)
+HOTEL_CHOICE = (
+    ('1','1'),
+    ('2','2'),
+    ('3','3'),
+    ('4','4'),
+    ('5','5'),
+    ('a','Апартаменты'),
+)
+class Staff(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField("Имя сотрудника",max_length=255)
+    full_name = models.CharField('ФИО',max_length=255)
+    sex = models.CharField('Пол',max_length=1,choices=SEX_CHOICE)
+    position = models.CharField('Должность',max_length=20,choices=POSITION_CHOICE)
+    photo = models.CharField('Фотография',max_length=255)
+    birthday = models.DateField(("Дата рождения"), auto_now=False, auto_now_add=False)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = ("Сотрудник")
+        verbose_name_plural = ("Сотрудники")
+    def __str__(self):
+        return(self.name)
     
+class Country(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.TextField("Название новости")
-    description = models.TextField('Описание')
-    photo = models.TextField('Ссылка на фотографию')
-    date = models.DateField(("Дата публикации"), auto_now=False, auto_now_add=False)
-    # author = models.CharField('Автор публикации',max_length=55)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    country = models.CharField('Страна',max_length=255)
     class Meta:
-        verbose_name = ("Новость")
-        verbose_name_plural = ("Новости")
-
+        verbose_name = ('Страна')
+        verbose_name_plural = ('Страны')
     def __str__(self):
-        return str(self.title) 
-class Students(models.Model):
+        return(self.country)
     
+class City(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.TextField("Имя студента")
-    surname = models.TextField('Фамилия студента')
-    status = models.CharField(max_length=1, choices=STATUS_CHOICE)
-    course = models.IntegerField('Курс')
+    city = models.CharField('Город',max_length=255)
+    country = models.ForeignKey(Country, related_name='countryes', on_delete=models.CASCADE)
     class Meta:
-        verbose_name = ("Студент")
-        verbose_name_plural = ("Студенты")
-
+        verbose_name = ('Город')
+        verbose_name_plural = ('Города')
     def __str__(self):
-        return str(self.name + " " + self.surname) 
+        return(self.city)
 
+class Organisation(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField('Имя организации',max_length=255)
+    city = models.ForeignKey(City, related_name='cities', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = ('Организация')
+        verbose_name_plural = ('Организации')
+    def __str__(self):
+        return(self.name)   
 
-class StudentsPhoto(models.Model):
+class Agents(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField('Имя',max_length=255)
+    full_name = models.CharField('ФИО',max_length=255)
+    organisation = models.ForeignKey(Organisation, related_name='organisations', on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = ('Агент')
+        verbose_name_plural = ('Агенты')
+    def __str__(self):
+        return(self.name)   
     
-    student_id = models.ForeignKey(Students,related_name='photos', on_delete=models.CASCADE)
-    photo_id = models.AutoField(primary_key=True)
-    url = models.TextField('Ссылка на фото')
-
+class Contract(models.Model):
+    id = models.AutoField(primary_key=True)
+    participants = models.IntegerField('Участники поездки')
+    date = models.DateField(("Дата"), auto_now=False, auto_now_add=False)
+    total = models.FloatField('Сумма(в валюте)')
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
     class Meta:
-        verbose_name = ("Фото студента")
-        verbose_name_plural = ("Фото студентов")
-
+        verbose_name = ('Договор')
+        verbose_name_plural = ('Договоры')
     def __str__(self):
-        return str("Фото "+ str(self.student_id.name)+"a "+ str(self.student_id.surname)+"a")
-
-class Projects(models.Model):
+        return(str(self.id))   
     
+class PaymentOfTheContract(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.TextField('Название проекта')
-    description = models.TextField('Описание проекта')
-    isDone = models.BooleanField
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staff,on_delete=models.CASCADE)
+    date = models.DateField('Дата',auto_now=False,auto_now_add=False)
+    total = models.FloatField('Сумма(в валюте)')
     class Meta:
-        verbose_name = ("Проект")
-        verbose_name_plural = ("Проекты")
-
+        verbose_name = ('Оплата договора')
+        verbose_name_plural = ('Оплата договоров')
     def __str__(self):
-        return self.name
-
-class StudentsProjects(models.Model):
-
-    id = models.AutoField(primary_key = True)
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE)
-    project_id = models.ForeignKey(Projects, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = ("Проект студента")
-        verbose_name_plural = ("Проекты студентов")
-
-    def __str__(self):
-        return str(self.project_id.name + " " + self.student_id.name + 'а '+ self.student_id.surname + 'а')
-
-class Lessons(models.Model):
-
-    id = models.AutoField(primary_key=True)
-    name = models.TextField("Название предмета")
-    description = models.TextField("Описание предмета")
-
-    class Meta:
-        verbose_name = ("Предмет")
-        verbose_name_plural = ("Предметы")
-
-    def __str__(self):
-        return self.name
-
-class StudentsLessons(models.Model):
-
-    id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name=("Предмет студента")
-        verbose_name_plural=("Предметы студентов")
-
-    def __str__(self):
-        return (self.student.name + " " + self.student.surname + " - " + self.lesson.name)
-
-class Clients(models.Model):
-
-    id = models.AutoField(primary_key=True)
-    name = models.TextField("Имя заказчика")
-    surname = models.TextField("Фамилия заказчика")
-
-    class Meta:
-        verbose_name = ("Заказчик")
-        verbose_name_plural = ("Заказчики")
-
-    def __str__(self):
-        return (self.name + " " + self.surname)
-        
-class EngineerProjects(models.Model):
-
-    id = models.AutoField(primary_key=True)
-    name = models.TextField('Название инженерного проекта')
-    description = models.TextField('Описание')
-    client = models.ForeignKey(Clients, on_delete=models.CASCADE)
-    student = models.ForeignKey(Students, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = ("Инженерный проетк")
-        verbose_name_plural = ("Инженерные проеткы")
+        return(str(self.id))
     
-    def __str__(self):
-        return self.name
-
-class Teachers(models.Model):
-
+class Report(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.TextField("Имя заказчика")
-    surname = models.TextField("Фамилия заказчика")
-    lesson = models.ForeignKey(Lessons, on_delete=models.CASCADE)
-    experience = models.IntegerField("Опыт (лет)")
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staff,on_delete=models.CASCADE)
+    date = models.DateField('Дата')
+    total_currency = models.FloatField('Сумма(в валюте)')
+    total_rubles = models.FloatField('Сумма(в рублях)')
     class Meta:
-        verbose_name = ('Преподаватель')
-        verbose_name_plural = ('Преподаватели')
-
+        verbose_name = ('Отчет')
+        verbose_name_plural = ('Отчеты')
     def __str__(self):
-        return (self.name + " " + self.surname)
-
-class TeachersPhotos(models.Model):
-
+        return(str(self.id))
+class Client(models.Model):
     id = models.AutoField(primary_key=True)
-    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE)
-    url = models.TextField('Ссылка на фотографию')
-
+    name = models.CharField('Имя',max_length=255)
+    full_name = models.CharField('ФИО',max_length=255)
+    sex = models.CharField('Пол',max_length=1,choices=SEX_CHOICE)
+    photo = models.CharField('Фотография',max_length=255)
+    birthday = models.DateField(("Дата рождения"), auto_now=False, auto_now_add=False)
+    birthplace = models.CharField('Место рождения',max_length=255)
+    passport_series = models.IntegerField('Серия паспорта')
+    passport_number = models.IntegerField('Номер паспорта')
+    passport_date = models.DateField('Дата выдачи', auto_now=False, auto_now_add=False)
+    passport_date_end = models.DateField('Дата окончания действия', auto_now=False, auto_now_add=False)
+    agency = models.CharField('Орган выдавший документ',max_length=255)
+    status = models.CharField(max_length=25,choices=STATUS_CHOICE)
     class Meta:
-        verbose_name = ("Фото преподавателя")
-        verbose_name_plural = ("Фото преподавателей")
-
+        verbose_name = ('Клиент')
+        verbose_name_plural = ('Клиенты')
     def __str__(self):
-        return ("фото "+  self.teacher.name + " " + self.teacher.surname)
-        
+        return(self.name)
+class Agreement(models.Model):
+    id = models.AutoField(primary_key=True)
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE)
+    agent = models.ForeignKey(Agents,on_delete=models.CASCADE)
+    countryes = models.ManyToManyField(Country)
+    client = models.ForeignKey(Client,on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staff,on_delete=models.CASCADE)
+    date = models.DateField('Дата соглашения', auto_now=False, auto_now_add=False)
+    date_begin = models.DateField('Дата начала поездки', auto_now=False, auto_now_add=False)
+    date_end = models.DateField('Дата окончания поездки', auto_now=False, auto_now_add=False)
+    class Meta:
+        verbose_name = ('Соглашение')
+        verbose_name_plural = ('Соглашения')
+    def __str__(self):
+        return(str(self.id)) 
+    
+class Hotels(models.Model):
+    id = models.AutoField(primary_key=True)
+    city = models.ForeignKey(City,on_delete=models.CASCADE)
+    name = models.CharField('Название отеля',max_length=255)
+    category = models.CharField(max_length=1,choices=HOTEL_CHOICE)
+    adress = models.CharField('Адрес',max_length=255)
+    class Meta:
+        verbose_name = ('Отель')
+        verbose_name_plural = ('Отели')
+    def __str__(self):
+        return(self.name)
+    
+class Route(models.Model):
+    id = models.AutoField(primary_key=True)
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name = ('Маршрут поездки')
+        verbose_name_plural = ('Маршруты поездок')
+    def __str__(self):
+        return(str(self.id))
+
+class Voucher(models.Model):
+    id = models.AutoField(primary_key=True)
+    transport=models.CharField('Вид транспорта',max_length=255)
+    class Meta:
+        verbose_name = ('Ваучер')
+        verbose_name_plural = ('Ваучеры')
+    def __str__(self):
+        return(str(self.id))
+
+class Tour(models.Model):
+    id = models.AutoField(primary_key=True)
+    hotel = models.ForeignKey(Hotels, on_delete=models.CASCADE)
+    voucher = models.ForeignKey(Voucher,on_delete=models.CASCADE)
+    route = models.ForeignKey(Route,on_delete=models.CASCADE)
+    type_of_number = models.CharField('Тип номера',max_length=15,choices=NUMBERS_CHOICE)
+    type_of_eat = models.CharField('Тип питания',max_length=15,choices=EAT_CHOICE)
+    class Meta:
+        verbose_name = ('Тур')
+        verbose_name_plural = ('Туры')
+    def __str__(self):
+        return(str(self.id))
+class ParticipantsOfTheTrip(models.Model):
+    id = models.AutoField(primary_key=True)
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE)
+    name = models.CharField('Имя',max_length=255)
+    full_name = models.CharField('ФИО',max_length=255)
+    birthday = models.DateField(("Дата рождения"), auto_now=False, auto_now_add=False)
+    class Meta:
+        verbose_name = ('Участники поездки')
+        verbose_name_plural = ('Участники поездок')
+    def __str__(self):
+        return(str(self.id))
+    
+class Transfer(models.Model):
+    id = models.AutoField(primary_key=True)
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE)
+    arrival = models.TimeField('Дата прибытия', auto_now=False, auto_now_add=False)
+    departure = models.TimeField('Дата отправления', auto_now=False, auto_now_add=False)
+    car_model = models.CharField('Модель машины',max_length=100)
+    class Meta:
+        verbose_name = ('Модель машины')
+        verbose_name_plural = ('Модели машин')
+    def __str__(self):
+        return(self.car_model)

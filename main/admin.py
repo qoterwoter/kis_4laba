@@ -1,238 +1,172 @@
 from django.contrib import admin
-from .models import Students, StudentsPhoto, Projects, StudentsProjects, Lessons, StudentsLessons, Clients, EngineerProjects, Teachers, TeachersPhotos, News
+from .models import *
 from django.db.models.functions import Lower
 from import_export.admin import ImportExportModelAdmin
 from import_export.formats import base_formats
-@admin.register(News)
-class NewsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id","title","description","date",'user')
-    search_fields = ['title','description']
-    list_filter = ['user','date']
-    pass
-    def get_orering(self,request):
-          return [Lower('id')]
-@admin.register(Students)
-class StudentsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id","name","surname","status",'course')
-    search_fields = ['name','surname']
-    list_filter = ['status','course']
-    actions=['restore','make_published','make_second_course','make_thirdly_course']
-    pass
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def make_published(self, request, queryset):
-        queryset.update(status='n')
-    def make_second_course(self, request, queryset):
-        queryset.update(course=2)
-    def make_thirdly_course(self, request, queryset):
-        queryset.update(course=3)
-    def restore(self,request, queryset):
-        queryset.update(status='y')
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-    make_published.short_description='Отчислить выбранных студентов'
-    restore.short_description='Восстановить выбранных студентов'
-    make_second_course.short_description='Перевести на второй курс'
-    make_thirdly_course.short_description='Перевести на третий курс'
+
+@admin.register(Staff)
+class StaffAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","name","full_name","sex",'position',"photo","birthday")
+      search_fields = ['name','full_name']
+      list_filter = ['sex','position']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+
+@admin.register(Country)
+class CountryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","country")
+      search_fields = ['country']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
     
+@admin.register(City)
+class CityAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","country","city")
+      search_fields = ['country__country','city']
+      list_filter = ['country']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Organisation)
+class OrganisationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","name","city")
+      search_fields = ['name','city']
+      list_filter = ['city']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Agents)
+class AgentsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","name","full_name",'organisation')
+      search_fields = ['name','full_name','organisation__name']
+      list_filter = ['organisation__name']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Contract)
+class ContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","participants",'organisation','date','total')
+      search_fields = ['name','organisation','total']
+      list_filter = ['organisation']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
 
-@admin.register(StudentsPhoto)
-class StudentsPhotoAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('student_id',"photo_id","url")
-    search_fields = ['student_id']
-    list_filter = ['student_id']
-    pass
-    def get_ordering(self, request):
-        return [Lower('photo_id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
+@admin.register(PaymentOfTheContract)
+class PaymentOfTheContractAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","contract","staff",'date','total')
+      search_fields = ['staff__name','total']
+      list_filter = ['staff']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Report)
+class ReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","contract","staff",'date','total_currency','total_rubles')
+      search_fields = ['staff__name','total_currency','total_rubles']
+      list_filter = ['staff']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
 
-
-@admin.register(Projects)
-class ProjectsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name","description")
-    search_fields = ['name','description']
-    list_filter = ['name','description']
-    pass
-    def get_ordering(self, request):
-        return [Lower('name')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-@admin.register(StudentsProjects)
-class StudentsProjectsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id","project_id","student_id")
-    list_filter = ['student_id', "project_id"]
-    search_fields = ['student_id__name','student_id__surname','project_id__name']
-    pass
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-
-@admin.register(Lessons)
-class LessonsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "name", "description")
-    list_filter = ['name']
-    search_fields = ['name','description']
-    pass
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-@admin.register(StudentsLessons)
-class StudentsLessonsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("lesson" ,"student")
-    search_fields = ['student__name','lesson__name']
-    list_filter = ['lesson',"student"]
-    ordering = ['lesson__name']
-    pass
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-
-
-@admin.register(Clients)
-class ClientsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id", "name", "surname")
-    list_filter = ['name','surname']
-    search_fields = ['name','surname']
-    pass
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-@admin.register(EngineerProjects)
-class EngineerProjectsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("name", "description", "client", "student")
-    search_fields = ['student__name','student__surname']
-    list_filter = ["student","client__name","client__surname","name"]
-    pass
-    def get_ordering(self, request):
-        return [Lower('name')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-@admin.register(Teachers)
-class TeachersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display= ("id",'name','surname','experience')
-    search_fields = ['name',"surname"]
-    list_filter = ['name','surname','experience']
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
-
-@admin.register(TeachersPhotos)
-class TeachersPhotos(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ("id","teacher",'url')
-    search_fields = ['teacher__name','teacher__surname']
-    list_filter = ['teacher']
-    pass
-    def get_ordering(self, request):
-        return [Lower('id')]
-    def get_import_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_import()]
-    def get_export_formats(self):
-            formats = (
-                  base_formats.XLS,
-                  base_formats.XLSX,
-            )
-            return [f for f in formats if f().can_export()]
+@admin.register(Client)
+class ClientAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","name","full_name","sex",'passport_series','passport_number','status')
+      search_fields = ['name','full_name']
+      list_filter = ['sex','status']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Agreement)
+class AgreementAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","get_organisation","get_agent",'get_client','get_staff','date','date_begin','date_end')
+      search_fields = ['organisation__name','agent__name','countryes__country']
+      list_filter = ['staff__name','agent__name','organisation__name','countryes__country']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      def get_staff(self,obj):
+            return obj.staff.name
+      get_staff.admin_order_field = 'Сотрудник'
+      get_staff.short_description= 'Сотрудник'
+      def get_agent(self,obj):
+            return obj.agent.name
+      get_agent.admin_order_field = 'Агент'
+      get_agent.short_description= 'Агент'
+      def get_client(self,obj):
+            return obj.client.name
+      get_client.admin_order_field = 'Клиент'
+      get_client.short_description= 'Клиент'
+      def get_organisation(self,obj):
+            return obj.organisation.name
+      get_organisation.admin_order_field = 'Организация'
+      get_organisation.short_description= 'Организация'
+      
+@admin.register(Hotels)
+class HotelsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","city",'name','category','adress')
+      search_fields = ['name']
+      list_filter = ['city__city']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Route)
+class RouteAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","contract")
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Voucher)
+class VoucherAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","transport")
+      search_fields=['transport']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Tour)
+class TourAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","get_hotel",'get_transport','get_route','type_of_number','type_of_eat')
+      search_fields=['hotel__name','type_of_number','type_of_eat']
+      list_filter = ['type_of_number','type_of_eat','hotel__name']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      def get_hotel(self,obj):
+            return obj.hotel.name
+      def get_route(self,obj):
+            return obj.route.id
+      def get_transport(self,obj):
+            return obj.voucher.transport
+      get_transport.admin_order_field = 'Транспорт'
+      get_transport.short_description= 'Транспорт из ваучера'
+      get_route.admin_order_field = 'Машрут'
+      get_route.short_description= 'Номер маршрута'
+      get_hotel.short_description = 'Отель'
+      
+@admin.register(ParticipantsOfTheTrip)
+class ParticipantsOfTheTripAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","contract",'voucher','name','full_name','birthday')
+      search_fields = ['name','full_name']
+      list_filter=['voucher__id']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
+      
+@admin.register(Transfer)
+class TransferAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+      list_display = ("id","voucher",'arrival','departure','car_model')
+      search_fields=['car_model']
+      list_filter=['voucher__id']
+      pass
+      def get_ordering(self,request):
+            return [Lower('id')]
