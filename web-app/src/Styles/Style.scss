@@ -30,19 +30,19 @@ body {
         padding: 0 40px;
     }
     .staff {
-        $news-background: #158BF8;
+        $staff-background: #158BF8;
         $text-color: #EAEAEA;
         padding: 0 40px;
         color: white;
-        .news {
+        .staff {
             display: flex;
             flex-direction: row;
             justify-content: space-around;
             flex-wrap: wrap;
-            .news__block {
+            .staff__block {
                 display: flex;
                 flex-direction: column;
-                background-color: $news-background;
+                background-color: $staff-background;
                 padding: 2px 25px;
                 border-radius: 5px;
                 margin-bottom: 25px;
