@@ -26,7 +26,7 @@ SECRET_KEY = '#des6k!(mf^b30huc$zas*c$!sm-3gnv36tgdt+dpp%si*!z+b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['kis-4laba.std-962.ist.mospolytech.ru/','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['kis-4laba.std-962.ist.mospolytech.ru','localhost','127.0.0.1']
 
 
 
